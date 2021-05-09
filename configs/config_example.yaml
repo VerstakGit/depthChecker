@@ -1,0 +1,9 @@
+keys:
+  api_key: apiKey
+  secret_key: secretKey
+
+tickers:
+  - symbol: LINKUSDT
+    large_order: 100000
+
+play_sound_alert: true
