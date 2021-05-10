@@ -1,22 +1,25 @@
 package depthChecker
 
 import (
-	"github.com/adshao/go-binance/v2/futures"
+	"github.com/verstakGit/go-binance/v2"
+	"github.com/verstakGit/go-binance/v2/futures"
 	"sync"
 )
 
 type DepthChecker struct {
-	cfg      *Config
-	client   *futures.Client
-	wg       sync.WaitGroup
-	quitChan chan struct{}
+	cfg           *Config
+	futuresClient *futures.Client
+	spotClient    *binance.Client
+	wg            sync.WaitGroup
+	quitChan      chan struct{}
 }
 
-func NewDepthChecker(cfg *Config, client *futures.Client) *DepthChecker {
+func NewDepthChecker(cfg *Config, futuresClient *futures.Client, spotClient *binance.Client) *DepthChecker {
 	dc := &DepthChecker{
-		cfg:      cfg,
-		client:   client,
-		quitChan: make(chan struct{}),
+		cfg:           cfg,
+		futuresClient: futuresClient,
+		spotClient:    spotClient,
+		quitChan:      make(chan struct{}),
 	}
 
 	return dc
@@ -24,7 +27,11 @@ func NewDepthChecker(cfg *Config, client *futures.Client) *DepthChecker {
 
 func (dc *DepthChecker) Run() error {
 	for idx := range dc.cfg.Tickers {
-		err := dc.startDepthWorker(dc.cfg.Tickers[idx].Symbol, dc.cfg.Tickers[idx].LargeOrder)
+		err := dc.startDepthWorker(
+			dc.cfg.Tickers[idx].Symbol,
+			dc.cfg.Tickers[idx].MarketType,
+			dc.cfg.Tickers[idx].LargeOrder,
+		)
 		if err != nil {
 			return err
 		}

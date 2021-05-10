@@ -1,6 +1,7 @@
 package depthChecker
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 )
@@ -19,6 +20,15 @@ type Keys struct {
 type Ticker struct {
 	Symbol     string
 	LargeOrder float64 `yaml:"large_order"`
+	MarketType string  `yaml:"market_type"` // f - futures, s - spot
+}
+
+type ErrUnknownMarketType struct {
+	Symbol string
+}
+
+func (err ErrUnknownMarketType) Error() string {
+	return fmt.Sprintf("uknown market type for %s, market type can be 'f' or 's'", err.Symbol)
 }
 
 func ParseConfig(path string) (*Config, error) {
@@ -31,6 +41,12 @@ func ParseConfig(path string) (*Config, error) {
 	err = yaml.Unmarshal(buf, c)
 	if err != nil {
 		return nil, err
+	}
+
+	for idx := range c.Tickers {
+		if c.Tickers[idx].MarketType != futuresMarket && c.Tickers[idx].MarketType != spotMarket {
+			return nil, ErrUnknownMarketType{Symbol: c.Tickers[idx].Symbol}
+		}
 	}
 
 	return c, nil

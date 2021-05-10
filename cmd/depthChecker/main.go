@@ -3,7 +3,7 @@ package main
 import (
 	"depthChecker/internal/depthChecker"
 	"flag"
-	"github.com/adshao/go-binance/v2"
+	"github.com/verstakGit/go-binance/v2"
 	"log"
 	"os"
 	"os/signal"
@@ -23,8 +23,9 @@ func main() {
 		return
 	}
 
-	client := binance.NewFuturesClient(cfg.Keys.APIKey, cfg.Keys.SecretKey)
-	dc := depthChecker.NewDepthChecker(cfg, client)
+	futuresClient := binance.NewFuturesClient(cfg.Keys.APIKey, cfg.Keys.SecretKey)
+	spotClient := binance.NewClient(cfg.Keys.APIKey, cfg.Keys.SecretKey)
+	dc := depthChecker.NewDepthChecker(cfg, futuresClient, spotClient)
 	go func() {
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
