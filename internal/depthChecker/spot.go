@@ -36,8 +36,8 @@ func (dc *DepthChecker) startSpotDepth(symbol string, largeOrder float64) error 
 	}
 
 	orderBook := make(map[float64]float64, 5000)
-	dc.fillOrdersAndAlert(orderBook, res.Bids, largeOrder, symbol)
-	dc.fillOrdersAndAlert(orderBook, res.Asks, largeOrder, symbol)
+	dc.fillOrdersAndAlert(orderBook, res.Bids, largeOrder, symbol, "spot")
+	dc.fillOrdersAndAlert(orderBook, res.Asks, largeOrder, symbol, "spot")
 	wInfo := &spotInfo{
 		events:       events,
 		symbol:       symbol,
@@ -71,8 +71,8 @@ func (dc *DepthChecker) startSpotWorker(wCfg *spotInfo) {
 			if prevID != 0 && prevID+1 != event.FirstUpdateID {
 				log.Println("order book desync", wCfg.symbol)
 			}
-			dc.fillOrdersAndAlert(wCfg.orderBook, event.Bids, wCfg.largeOrder, wCfg.symbol)
-			dc.fillOrdersAndAlert(wCfg.orderBook, event.Asks, wCfg.largeOrder, wCfg.symbol)
+			dc.fillOrdersAndAlert(wCfg.orderBook, event.Bids, wCfg.largeOrder, wCfg.symbol, "spot")
+			dc.fillOrdersAndAlert(wCfg.orderBook, event.Asks, wCfg.largeOrder, wCfg.symbol, "spot")
 			prevID = event.LastUpdateID
 		case <-dc.quitChan:
 			return

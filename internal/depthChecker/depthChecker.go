@@ -4,6 +4,7 @@ import (
 	"github.com/verstakGit/go-binance/v2"
 	"github.com/verstakGit/go-binance/v2/futures"
 	"sync"
+	"time"
 )
 
 type DepthChecker struct {
@@ -12,6 +13,13 @@ type DepthChecker struct {
 	spotClient    *binance.Client
 	wg            sync.WaitGroup
 	quitChan      chan struct{}
+	alertLevels   map[level]time.Time
+}
+
+type level struct {
+	symbol     string
+	marketType string
+	price      float64
 }
 
 func NewDepthChecker(cfg *Config, futuresClient *futures.Client, spotClient *binance.Client) *DepthChecker {
@@ -20,6 +28,7 @@ func NewDepthChecker(cfg *Config, futuresClient *futures.Client, spotClient *bin
 		futuresClient: futuresClient,
 		spotClient:    spotClient,
 		quitChan:      make(chan struct{}),
+		alertLevels:   make(map[level]time.Time),
 	}
 
 	return dc

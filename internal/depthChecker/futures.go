@@ -37,8 +37,8 @@ func (dc *DepthChecker) startFuturesDepth(symbol string, largeOrder float64) err
 	}
 
 	orderBook := make(map[float64]float64, 2000)
-	dc.fillOrdersAndAlert(orderBook, res.Bids, largeOrder, symbol)
-	dc.fillOrdersAndAlert(orderBook, res.Asks, largeOrder, symbol)
+	dc.fillOrdersAndAlert(orderBook, res.Bids, largeOrder, symbol, "futures")
+	dc.fillOrdersAndAlert(orderBook, res.Asks, largeOrder, symbol, "futures")
 	wInfo := &futuresInfo{
 		events:       events,
 		symbol:       symbol,
@@ -72,8 +72,8 @@ func (dc *DepthChecker) startFuturesWorker(wCfg *futuresInfo) {
 			if prevID != 0 && prevID != event.PrevLastUpdateID {
 				log.Println("order book desync", wCfg.symbol)
 			}
-			dc.fillOrdersAndAlert(wCfg.orderBook, event.Bids, wCfg.largeOrder, wCfg.symbol)
-			dc.fillOrdersAndAlert(wCfg.orderBook, event.Asks, wCfg.largeOrder, wCfg.symbol)
+			dc.fillOrdersAndAlert(wCfg.orderBook, event.Bids, wCfg.largeOrder, wCfg.symbol, "futures")
+			dc.fillOrdersAndAlert(wCfg.orderBook, event.Asks, wCfg.largeOrder, wCfg.symbol, "futures")
 			prevID = event.LastUpdateID
 		case <-dc.quitChan:
 			return

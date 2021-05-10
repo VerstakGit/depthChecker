@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"time"
 )
 
 type Config struct {
 	Keys           Keys
 	Tickers        []Ticker
-	PlaySoundAlert bool `yaml:"play_sound_alert"`
+	PlaySoundAlert bool          `yaml:"play_sound_alert"`
+	AlertCooldown  time.Duration `yaml:"alert_cooldown"`
 }
 
 type Keys struct {

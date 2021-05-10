@@ -4,6 +4,7 @@ import (
 	"github.com/gen2brain/beeep"
 	"github.com/verstakGit/go-binance/v2/common"
 	"log"
+	"time"
 )
 
 const (
@@ -25,7 +26,7 @@ func (dc *DepthChecker) startDepthWorker(symbol, marketType string, largeOrder f
 	return err
 }
 
-func (dc *DepthChecker) fillOrdersAndAlert(orderBook map[float64]float64, orders []common.PriceLevel, largeOrder float64, symbol string) {
+func (dc *DepthChecker) fillOrdersAndAlert(orderBook map[float64]float64, orders []common.PriceLevel, largeOrder float64, symbol, marketType string) {
 	for idx := range orders {
 		p, q, err := orders[idx].Parse()
 		if err != nil {
@@ -34,7 +35,18 @@ func (dc *DepthChecker) fillOrdersAndAlert(orderBook map[float64]float64, orders
 		}
 		orderBook[p] = q
 		if p*q >= largeOrder {
-			log.Printf("%s:: price = %v, quantity = %v, total sum (USD) = %v", symbol, p, q, int(p*q))
+			level := level{
+				symbol:     symbol,
+				marketType: marketType,
+				price:      p,
+			}
+			prevTime, ok := dc.alertLevels[level]
+			curTime := time.Now()
+			if ok && prevTime.Add(dc.cfg.AlertCooldown).After(curTime) {
+				continue
+			}
+			dc.alertLevels[level] = curTime
+			log.Printf("%s %s:: price = %v, quantity = %v, total sum (USD) = %v", symbol, marketType, p, q, int(p*q))
 			if dc.cfg.PlaySoundAlert {
 				err := beeep.Beep(246, 500)
 				if err != nil {
