@@ -8,10 +8,20 @@ import (
 )
 
 type Config struct {
-	Keys           Keys
-	Tickers        []Ticker
-	PlaySoundAlert bool          `yaml:"play_sound_alert"`
-	AlertCooldown  time.Duration `yaml:"alert_cooldown"`
+	Keys              Keys
+	Tickers           []Ticker
+	PlaySoundAlert    bool          `yaml:"play_sound_alert"`
+	AlertCooldown     time.Duration `yaml:"alert_cooldown"`
+	CheckTickersByVol bool          `yaml:"check_tickers_by_vol"`
+	VolTickers        VolTickers    `yaml:"vol_tickers"`
+	FuturesDepthLimit int           `yaml:"futures_depth_limit"`
+	SpotDepthLimit    int           `yaml:"spot_depth_limit"`
+}
+
+type VolTickers struct {
+	SymbolBanList []string `yaml:"symbol_ban_list"`
+	SymbolCnt     int      `yaml:"symbol_cnt"`
+	LargeOrder    float64  `yaml:"large_order"`
 }
 
 type Keys struct {

@@ -2,8 +2,12 @@ package depthChecker
 
 import (
 	"context"
+	"depthChecker/internal"
+	"fmt"
 	"github.com/verstakGit/go-binance/v2/futures"
 	"log"
+	"sort"
+	"strconv"
 	"time"
 )
 
@@ -31,7 +35,7 @@ func (dc *DepthChecker) startFuturesDepth(symbol string, largeOrder float64) err
 		return err
 	}
 
-	res, err := dc.futuresClient.NewDepthService().Limit(1000).Symbol(symbol).Do(context.Background())
+	res, err := dc.futuresClient.NewDepthService().Limit(dc.cfg.FuturesDepthLimit).Symbol(symbol).Do(context.Background())
 	if err != nil {
 		return err
 	}
@@ -49,6 +53,7 @@ func (dc *DepthChecker) startFuturesDepth(symbol string, largeOrder float64) err
 		orderBook:    orderBook,
 	}
 
+	fmt.Printf("starting futures %s worker\n", symbol)
 	dc.wg.Add(1)
 	go dc.startFuturesWorker(wInfo)
 
@@ -80,4 +85,33 @@ func (dc *DepthChecker) startFuturesWorker(wCfg *futuresInfo) {
 		}
 	}
 
+}
+
+func (dc *DepthChecker) startSymbolsByVol() error {
+	stats, err := dc.futuresClient.NewListPriceChangeStatsService().Do(context.Background())
+	if err != nil {
+		return err
+	}
+
+	sort.Slice(stats, func(i, j int) bool {
+		volI, _ := strconv.ParseFloat(stats[i].QuoteVolume, 64)
+		volJ, _ := strconv.ParseFloat(stats[j].QuoteVolume, 64)
+		return volI < volJ
+	})
+	cnt := 0
+	for idx := len(stats) - 1; idx >= 0; idx-- {
+		if cnt >= dc.cfg.VolTickers.SymbolCnt {
+			return nil
+		}
+		if internal.Contains(dc.cfg.VolTickers.SymbolBanList, stats[idx].Symbol) {
+			continue
+		}
+
+		err = dc.startFuturesDepth(stats[idx].Symbol, dc.cfg.VolTickers.LargeOrder)
+		if err != nil {
+			return err
+		}
+		cnt++
+	}
+	return nil
 }

@@ -2,6 +2,7 @@ package depthChecker
 
 import (
 	"context"
+	"fmt"
 	"github.com/verstakGit/go-binance/v2"
 	"log"
 )
@@ -30,7 +31,7 @@ func (dc *DepthChecker) startSpotDepth(symbol string, largeOrder float64) error 
 		return err
 	}
 
-	res, err := dc.spotClient.NewDepthService().Limit(5000).Symbol(symbol).Do(context.Background())
+	res, err := dc.spotClient.NewDepthService().Limit(dc.cfg.SpotDepthLimit).Symbol(symbol).Do(context.Background())
 	if err != nil {
 		return err
 	}
@@ -48,6 +49,7 @@ func (dc *DepthChecker) startSpotDepth(symbol string, largeOrder float64) error 
 		orderBook:    orderBook,
 	}
 
+	fmt.Printf("starting spot %s worker\n", symbol)
 	dc.wg.Add(1)
 	go dc.startSpotWorker(wInfo)
 

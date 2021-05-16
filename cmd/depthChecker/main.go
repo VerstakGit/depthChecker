@@ -3,6 +3,7 @@ package main
 import (
 	"depthChecker/internal/depthChecker"
 	"flag"
+	"fmt"
 	"github.com/verstakGit/go-binance/v2"
 	"log"
 	"os"
@@ -31,6 +32,7 @@ func main() {
 		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 		<-sig
 		dc.Shutdown()
+		fmt.Println("shutdown the process...")
 	}()
 
 	err = dc.Run()

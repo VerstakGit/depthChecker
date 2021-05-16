@@ -1,11 +1,28 @@
-keys:
+keys: # Current version can perfectly work without them, you can left them as is
   api_key: apiKey
   secret_key: secretKey
 
-tickers:
+check_tickers_by_vol: true # Service can work in 2 different modes:
+                           # 1. if "check_tickers_by_vol" = true then service will automatically find the best futures tickers for tracking (selection is working by volume)
+                           # In this mode you can select symbols that you don't want to track in "vol_tickers" section
+                           # Section "tickers" doesn't work in this mode.
+                           # 2. if "check_tickers_by_vol" = false then service will track tickers from "tickers" section
+                           # Section "vol_tickers" is ignored in this mode.
+
+vol_tickers: # Settings for first mode
+  symbol_ban_list:
+    - BTCUSDT
+    - LTCUSDT
+    - ETHUSDT
+  symbol_cnt: 10 # Number of tickers you want to track
+  large_order: 500000 # Large order size (in USD)
+
+tickers: # Settings for second mode
   - symbol: LINKUSDT
     large_order: 100000
     market_type: f
 
-play_sound_alert: true
-alert_cooldown: 5m
+play_sound_alert: true # Make a sound alert on large orders
+alert_cooldown: 5m # Set an alert cooldown on exact ticker and price for X interval
+futures_depth_limit: 500 # Limit for binance futures order book API (acceptable values: 5,10,20,50,100,500,1000)
+spot_depth_limit: 1000 # Limit for binance spot order book API (acceptable values: 5,10,20,50,100,500,1000,5000)

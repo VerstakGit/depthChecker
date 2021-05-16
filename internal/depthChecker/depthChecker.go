@@ -35,14 +35,21 @@ func NewDepthChecker(cfg *Config, futuresClient *futures.Client, spotClient *bin
 }
 
 func (dc *DepthChecker) Run() error {
-	for idx := range dc.cfg.Tickers {
-		err := dc.startDepthWorker(
-			dc.cfg.Tickers[idx].Symbol,
-			dc.cfg.Tickers[idx].MarketType,
-			dc.cfg.Tickers[idx].LargeOrder,
-		)
+	if dc.cfg.CheckTickersByVol {
+		err := dc.startSymbolsByVol()
 		if err != nil {
 			return err
+		}
+	} else {
+		for idx := range dc.cfg.Tickers {
+			err := dc.startDepthWorker(
+				dc.cfg.Tickers[idx].Symbol,
+				dc.cfg.Tickers[idx].MarketType,
+				dc.cfg.Tickers[idx].LargeOrder,
+			)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
